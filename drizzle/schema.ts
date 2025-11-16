@@ -25,6 +25,10 @@ export const conversations = mysqlTable("conversations", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
+  systemPrompt: text("systemPrompt"), // Custom system prompt for this conversation
+  llmProvider: varchar("llmProvider", { length: 64 }).default("openai"), // AI provider
+  llmModel: varchar("llmModel", { length: 128 }).default("gpt-4"), // AI model
+  temperature: int("temperature").default(70), // Temperature * 100 (0-200)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastMessageAt: timestamp("lastMessageAt"),
@@ -61,9 +65,11 @@ export const userSettings = mysqlTable("userSettings", {
   // AI Provider preferences
   defaultTextProvider: varchar("defaultTextProvider", { length: 64 }).default("openai"),
   defaultTextModel: varchar("defaultTextModel", { length: 128 }).default("gpt-4"),
-  defaultVoiceProvider: varchar("defaultVoiceProvider", { length: 64 }).default("openai"),
-  defaultTtsProvider: varchar("defaultTtsProvider", { length: 64 }).default("openai"),
-  defaultTtsVoice: varchar("defaultTtsVoice", { length: 64 }).default("alloy"),
+  defaultSttProvider: varchar("defaultSttProvider", { length: 64 }).default("whisper"),
+  defaultSttModel: varchar("defaultSttModel", { length: 64 }).default("whisper-1"),
+  defaultTtsProvider: varchar("defaultTtsProvider", { length: 64 }).default("elevenlabs"),
+  defaultTtsVoice: varchar("defaultTtsVoice", { length: 128 }).default("ZF6FPAbjXT4488VcRRnw"),
+  defaultTtsModel: varchar("defaultTtsModel", { length: 64 }).default("eleven_turbo_v2_5"),
   // Voice settings
   silenceThreshold: int("silenceThreshold").default(1500), // ms
   vadSensitivity: int("vadSensitivity").default(70), // 0-100

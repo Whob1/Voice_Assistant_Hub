@@ -6,6 +6,9 @@ import { z } from "zod";
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
 import { transcribeAudio } from "./_core/voiceTranscription";
+import { callLLM, getAvailableModels, getProviderName } from "./providers/llm";
+import { callSTT, getAvailableSTTModels, getSTTProviderName } from "./providers/stt";
+import { callTTS, getAvailableVoices, getTTSProviderName } from "./providers/tts";
 import { storagePut } from "./storage";
 import { TRPCError } from "@trpc/server";
 
@@ -120,8 +123,6 @@ export const appRouter = router({
       .input(z.object({
         conversationId: z.number(),
         message: z.string(),
-        provider: z.string().optional(),
-        model: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const conversation = await db.getConversationById(input.conversationId);
@@ -139,9 +140,19 @@ export const appRouter = router({
           content: input.message,
         });
 
+        // Get provider config if needed
+        const providerConfigs = await db.getUserProviderConfigs(ctx.user.id);
+        const provider = conversation.llmProvider || "openai";
+        const model = conversation.llmModel || "gpt-4";
+        const temperature = (conversation.temperature || 70) / 100;
+        
+        const providerConfig = providerConfigs.find(p => p.provider === provider && p.isActive);
+        const apiKey = providerConfig?.apiKey;
+
         // Build messages for AI
+        const systemPrompt = conversation.systemPrompt || "You are a helpful AI assistant with voice capabilities. Provide clear, concise, and helpful responses.";
         const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
-          { role: "system", content: "You are a helpful AI assistant with voice capabilities. Provide clear, concise, and helpful responses." },
+          { role: "system", content: systemPrompt },
           ...history.map(m => ({
             role: m.role as "user" | "assistant" | "system",
             content: m.content,
@@ -149,38 +160,71 @@ export const appRouter = router({
           { role: "user", content: input.message },
         ];
 
-        // Call AI
-        const response = await invokeLLM({ messages });
-        const messageContent = response.choices[0]?.message?.content;
-        const assistantMessage = typeof messageContent === 'string' 
-          ? messageContent 
-          : "I apologize, but I couldn't generate a response.";
+        // Call AI with multi-provider support
+        let assistantMessage: string;
+        let tokenCount = 0;
+        
+        try {
+          if (provider === "openai" && !apiKey) {
+            // Use built-in OpenAI
+            const response = await invokeLLM({ messages });
+            const messageContent = response.choices[0]?.message?.content;
+            assistantMessage = typeof messageContent === 'string' 
+              ? messageContent 
+              : "I apologize, but I couldn't generate a response.";
+            tokenCount = response.usage?.total_tokens || 0;
+          } else {
+            // Use multi-provider system
+            const response = await callLLM({
+              messages,
+              provider,
+              model,
+              apiKey,
+              temperature,
+              maxTokens: 2000,
+            });
+            assistantMessage = response.content;
+            tokenCount = response.usage?.total_tokens || 0;
+          }
+        } catch (error: any) {
+          assistantMessage = `Error: ${error.message}. Please check your provider configuration.`;
+        }
 
         // Save assistant message
         const messageId = await db.createMessage({
           conversationId: input.conversationId,
           role: "assistant",
           content: assistantMessage,
-          provider: input.provider || "openai",
-          model: input.model || "gpt-4",
-          tokenCount: response.usage?.total_tokens,
+          provider,
+          model,
+          tokenCount,
         });
 
         // Track usage
         await db.trackUsage({
           userId: ctx.user.id,
           date: new Date(),
-          provider: input.provider || "openai",
+          provider,
           requestType: "text",
-          tokenCount: response.usage?.total_tokens || 0,
+          tokenCount,
         });
 
         return {
           messageId,
           content: assistantMessage,
-          tokenCount: response.usage?.total_tokens,
+          tokenCount,
         };
       }),
+    
+    // Get available providers and models
+    getProviders: protectedProcedure.query(() => {
+      return [
+        { id: "openai", name: "OpenAI", models: getAvailableModels("openai") },
+        { id: "openrouter", name: "OpenRouter", models: getAvailableModels("openrouter") },
+        { id: "mistral", name: "Mistral AI", models: getAvailableModels("mistral") },
+        { id: "anthropic", name: "Anthropic Claude", models: getAvailableModels("anthropic") },
+      ];
+    }),
   }),
 
   // ============ Voice Features ============
@@ -189,18 +233,46 @@ export const appRouter = router({
       .input(z.object({
         audioUrl: z.string(),
         language: z.string().optional(),
+        provider: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const result = await transcribeAudio({
-          audioUrl: input.audioUrl,
-          language: input.language,
-        });
+        const settings = await db.getUserSettings(ctx.user.id);
+        const provider = input.provider || settings?.defaultSttProvider || "whisper";
+        
+        // Get provider config if needed
+        const providerConfigs = await db.getUserProviderConfigs(ctx.user.id);
+        const providerConfig = providerConfigs.find(p => p.provider === provider && p.isActive);
+        const apiKey = providerConfig?.apiKey;
 
-        // Check if transcription was successful
-        if ('error' in result) {
+        let result;
+        try {
+          if (provider === "whisper" && !apiKey) {
+            // Use built-in Whisper
+            const whisperResult = await transcribeAudio({
+              audioUrl: input.audioUrl,
+              language: input.language,
+            });
+
+            if ('error' in whisperResult) {
+              throw new TRPCError({ 
+                code: "INTERNAL_SERVER_ERROR", 
+                message: whisperResult.error 
+              });
+            }
+            result = whisperResult;
+          } else {
+            // Use multi-provider STT
+            result = await callSTT({
+              audioUrl: input.audioUrl,
+              language: input.language,
+              provider,
+              apiKey,
+            });
+          }
+        } catch (error: any) {
           throw new TRPCError({ 
             code: "INTERNAL_SERVER_ERROR", 
-            message: result.error 
+            message: `Transcription failed: ${error.message}` 
           });
         }
 
@@ -208,7 +280,7 @@ export const appRouter = router({
         await db.trackUsage({
           userId: ctx.user.id,
           date: new Date(),
-          provider: "openai",
+          provider: 'provider' in result ? result.provider : provider,
           requestType: "voice",
           audioSeconds: Math.ceil((result.duration || 0)),
         });
@@ -219,6 +291,63 @@ export const appRouter = router({
           duration: result.duration,
         };
       }),
+    
+    // Generate TTS audio
+    generateSpeech: protectedProcedure
+      .input(z.object({
+        text: z.string(),
+        provider: z.string().optional(),
+        voice: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const settings = await db.getUserSettings(ctx.user.id);
+        const provider = input.provider || settings?.defaultTtsProvider || "elevenlabs";
+        const voice = input.voice || settings?.defaultTtsVoice;
+        
+        // Get provider config
+        const providerConfigs = await db.getUserProviderConfigs(ctx.user.id);
+        const providerConfig = providerConfigs.find(p => p.provider === provider && p.isActive);
+        
+        if (!providerConfig?.apiKey) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `API key required for ${provider}. Please configure in settings.`,
+          });
+        }
+
+        try {
+          const result = await callTTS({
+            text: input.text,
+            provider,
+            voice: voice || undefined,
+            apiKey: providerConfig.apiKey,
+            model: settings?.defaultTtsModel || undefined,
+          });
+
+          return result;
+        } catch (error: any) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `TTS generation failed: ${error.message}`,
+          });
+        }
+      }),
+    
+    // Get available STT providers
+    getSttProviders: protectedProcedure.query(() => {
+      return [
+        { id: "whisper", name: "OpenAI Whisper", models: getAvailableSTTModels("whisper") },
+        { id: "deepgram", name: "Deepgram", models: getAvailableSTTModels("deepgram") },
+      ];
+    }),
+    
+    // Get available TTS providers
+    getTtsProviders: protectedProcedure.query(() => {
+      return [
+        { id: "elevenlabs", name: "ElevenLabs" },
+        { id: "hume", name: "Hume AI" },
+      ];
+    }),
 
     uploadAudio: protectedProcedure
       .input(z.object({

@@ -166,38 +166,38 @@ export function ConversationSidebar({
               </div>
             ) : (
               conversations.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  onClick={() => {
-                    onConversationSelect(conversation.id);
-                    onClose?.();
-                  }}
-                  className={`w-full text-left p-3 rounded-lg mb-2 transition-colors group hover:bg-accent ${
-                    currentConversationId === conversation.id
-                      ? "bg-accent"
-                      : ""
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2 flex-1 min-w-0">
-                      <MessageSquare className="h-5 w-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate">{conversation.title}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(conversation.updatedAt).toLocaleDateString()}
-                        </p>
-                      </div>
+              <div
+                key={conversation.id}
+                className={`w-full text-left p-3 rounded-lg mb-2 transition-colors group hover:bg-accent cursor-pointer ${
+                  currentConversationId === conversation.id
+                    ? "bg-accent"
+                    : ""
+                }`}
+                onClick={() => {
+                  onConversationSelect(conversation.id);
+                  onClose?.();
+                }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <MessageSquare className="h-5 w-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium truncate">{conversation.title}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(conversation.updatedAt).toLocaleDateString()}
+                      </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => handleDeleteConversation(conversation.id, e)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
                   </div>
-                </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => handleDeleteConversation(conversation.id, e)}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </div>
               ))
             )}
           </div>

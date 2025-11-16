@@ -15,6 +15,13 @@
       "when": 1763245253660,
       "tag": "0001_public_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763256953287,
+      "tag": "0002_thin_madripoor",
+      "breakpoints": true
     }
   ]
 }
