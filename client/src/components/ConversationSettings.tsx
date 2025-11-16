@@ -33,7 +33,7 @@ export function ConversationSettings({ conversationId }: ConversationSettingsPro
   const utils = trpc.useUtils();
 
   const { data: conversation } = trpc.conversations.get.useQuery({ id: conversationId });
-  const { data: llmProviders = [] } = trpc.chat.getProviders.useQuery();
+  const { data: llmProviders = [], isLoading: isLoadingProviders } = trpc.chat.getProviders.useQuery();
 
   const [provider, setProvider] = useState("openai");
   const [model, setModel] = useState("gpt-4");
@@ -131,16 +131,20 @@ export function ConversationSettings({ conversationId }: ConversationSettingsPro
             {/* Provider Selection */}
             <div className="space-y-2">
               <Label htmlFor="provider">AI Provider</Label>
-              <Select value={provider} onValueChange={setProvider}>
+              <Select value={provider} onValueChange={setProvider} disabled={isLoadingProviders}>
                 <SelectTrigger id="provider">
-                  <SelectValue />
+                  <SelectValue placeholder="Select provider" />
                 </SelectTrigger>
                 <SelectContent>
-                  {llmProviders.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
+                  {llmProviders.length > 0 ? (
+                    llmProviders.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="openai">OpenAI (Default)</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -186,9 +190,7 @@ export function ConversationSettings({ conversationId }: ConversationSettingsPro
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="none" disabled>
-                          No models available
-                        </SelectItem>
+                        <SelectItem value="gpt-4">GPT-4 (Default)</SelectItem>
                       )}
                     </SelectContent>
                   </Select>
