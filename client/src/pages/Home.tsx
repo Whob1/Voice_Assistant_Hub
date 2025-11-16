@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { ConversationSidebar } from "@/components/ConversationSidebar";
+import { ConversationTemplates } from "@/components/ConversationTemplates";
 import { ChatInterface } from "@/components/ChatInterface";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Sparkles, Menu } from "lucide-react";

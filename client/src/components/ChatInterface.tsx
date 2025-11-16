@@ -2,8 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Phone } from "lucide-react";
 import { VoiceRecorder } from "./VoiceRecorder";
+import { AudioPlayer } from "./AudioPlayer";
+import { ConversationSettings } from "./ConversationSettings";
+import { ExportConversation } from "./ExportConversation";
+import { VoiceCallMode } from "./VoiceCallMode";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
 import { toast } from "sonner";
@@ -22,6 +26,7 @@ interface ChatInterfaceProps {
 export function ChatInterface({ conversationId }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showVoiceCall, setShowVoiceCall] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const utils = trpc.useUtils();
 
@@ -75,8 +80,30 @@ export function ChatInterface({ conversationId }: ChatInterfaceProps) {
     setInputValue(text);
   };
 
+  // Keyboard shortcuts
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
+      {/* Header with controls */}
+      <div className="border-b border-border p-3 flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowVoiceCall(true)}
+        >
+          <Phone className="h-4 w-4 mr-2" />
+          Voice Call
+        </Button>
+        <ExportConversation conversationId={conversationId} />
+        <ConversationSettings conversationId={conversationId} />
+      </div>
+
       {/* Messages area */}
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4 max-w-4xl mx-auto">
@@ -108,17 +135,24 @@ export function ChatInterface({ conversationId }: ChatInterfaceProps) {
                   </div>
                 )}
                 
-                <div
-                  className={`max-w-[80%] rounded-lg px-4 py-3 ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "glass"
-                  }`}
-                >
-                  {message.role === "assistant" ? (
-                    <Streamdown>{message.content}</Streamdown>
-                  ) : (
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                <div className="flex flex-col gap-2">
+                  <div
+                    className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "glass"
+                    }`}
+                  >
+                    {message.role === "assistant" ? (
+                      <Streamdown>{message.content}</Streamdown>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    )}
+                  </div>
+                  {message.role === "assistant" && (
+                    <div className="flex items-center gap-1">
+                      <AudioPlayer text={message.content} messageId={message.id} />
+                    </div>
                   )}
                 </div>
 
@@ -153,6 +187,14 @@ export function ChatInterface({ conversationId }: ChatInterfaceProps) {
         </div>
       </ScrollArea>
 
+      {/* Voice Call Modal */}
+      {showVoiceCall && (
+        <VoiceCallMode
+          conversationId={conversationId}
+          onClose={() => setShowVoiceCall(false)}
+        />
+      )}
+
       {/* Input area */}
       <div className="border-t border-border p-4">
         <div className="max-w-4xl mx-auto flex gap-2">
@@ -165,7 +207,8 @@ export function ChatInterface({ conversationId }: ChatInterfaceProps) {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
+            placeholder="Type your message... (Ctrl+Enter to send)"
+            onKeyDown={handleKeyDown}
             disabled={sendMessageMutation.isPending}
             className="flex-1"
           />

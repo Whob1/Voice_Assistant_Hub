@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, MessageSquare, Trash2, Settings, X } from "lucide-react";
+import { ConversationTemplates } from "./ConversationTemplates";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -121,13 +122,14 @@ export function ConversationSidebar({
             </div>
           </div>
 
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full" variant="default">
-                <Plus className="h-4 w-4 mr-2" />
-                New Conversation
-              </Button>
-            </DialogTrigger>
+          <div className="space-y-2">
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full" variant="default">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Conversation
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New Conversation</DialogTitle>
@@ -153,7 +155,9 @@ export function ConversationSidebar({
               </div>
             </DialogContent>
           </Dialog>
+          <ConversationTemplates />
         </div>
+      </div>
 
         {/* Conversations list */}
         <ScrollArea className="flex-1">

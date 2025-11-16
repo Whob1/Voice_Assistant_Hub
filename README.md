@@ -1,131 +1,92 @@
 # AI Voice Assistant Hub
 
-A sophisticated, production-ready web application that serves as a universal AI assistant hub with advanced voice capabilities, multi-provider support, and intelligent conversation management.
+A sophisticated, production-ready AI voice assistant application with multi-provider support, real-time voice conversation, advanced customization capabilities, and conversation templates.
 
-## Features
+## 🌟 Key Features
+
+### 🤖 Multi-Provider AI Integration
+- **OpenAI** (GPT-4, GPT-3.5 Turbo) - Built-in support, no API key required
+- **OpenRouter** - Access to Mistral, Claude, Llama, and 200+ models
+- **Mistral AI** - Support for normal and custom fine-tuned models
+- **Anthropic Claude** - Claude 3.5 Sonnet, Opus, and Haiku
+- **Hume AI** - Emotion-aware AI conversations
+- Easy provider switching per conversation
+- Custom model configuration with temperature control (0-2.0)
+- Per-conversation system prompts
 
 ### 🎤 Advanced Voice Capabilities
-- **Real-time Voice Recording**: High-quality audio capture with WebRTC
-- **Voice Activity Detection (VAD)**: Intelligent detection of speech vs. silence
-- **Automatic Silence Detection**: Configurable thresholds (500ms-3000ms)
-- **Live Transcription**: Powered by OpenAI Whisper API
-- **Waveform Visualization**: Real-time audio level display during recording
-- **Smart Turn Management**: Automatic stop after silence detection
-
-### 🤖 AI Integration
-- **Multi-Provider Support**: Built-in integration with OpenAI GPT models
-- **Streaming Responses**: Real-time AI response generation
-- **Context-Aware Conversations**: Maintains conversation history and context
-- **Markdown Rendering**: Rich text formatting for AI responses
-- **Token Usage Tracking**: Monitor API usage and costs
+- **Real-time Voice Recording** with waveform visualization
+- **Voice Activity Detection (VAD)** with configurable sensitivity (0-100%)
+- **Automatic Silence Detection** with adjustable thresholds (500-3000ms)
+- **Speech-to-Text** powered by:
+  - OpenAI Whisper (built-in, no API key required)
+  - Deepgram (with custom API key)
+- **Text-to-Speech** via:
+  - ElevenLabs (multiple voice options)
+  - Hume AI (emotion-aware voices)
+- **Voice Call Mode** - Continuous conversation with automatic turn detection
+- **Audio Playback Controls** - Play/pause AI responses on demand
+- **TTS Speed Control** (50-200%)
+- **Auto-play Toggle** for AI responses
 
 ### 💬 Conversation Management
-- **Thread Organization**: Create and manage multiple conversation threads
-- **Conversation History**: Persistent message storage
-- **Search and Filter**: Easy navigation through conversations
-- **Auto-Save**: Automatic conversation updates
-- **Delete and Archive**: Clean up old conversations
+- **Conversation Templates** - Pre-configured AI settings for specific use cases:
+  - **Creative Writing** - High creativity (temp: 0.9) for storytelling
+  - **Code Assistant** - Precise (temp: 0.3) for programming help
+  - **Business Advisor** - Analytical (temp: 0.5) for strategy
+  - **Personal Tutor** - Patient (temp: 0.4) for learning
+  - **Brainstorm Partner** - Creative (temp: 0.85) for idea generation
+  - **Quick Answers** - Fast (temp: 0.2) with GPT-3.5 Turbo
+- **Per-Conversation Settings Menu** - Customize provider, model, temperature, and system prompt without leaving the chat
+- **Export Conversations** - Download as:
+  - JSON (full data with metadata)
+  - Markdown (formatted documentation)
+  - Plain Text (simple transcript)
+- **Conversation History** with timestamps
+- **Thread Organization** and management
+- **Delete Conversations** with confirmation
+
+### ⚙️ User Settings & Customization
+- **Voice Settings Tab**:
+  - Silence threshold (500-3000ms)
+  - VAD sensitivity (0-100%)
+  - TTS speed (50-200%)
+  - Auto-play AI responses toggle
+  - Default STT provider selection
+  - Default TTS provider selection
+- **API Keys Tab** - Manage provider credentials:
+  - OpenRouter API key
+  - Mistral AI API key
+  - Anthropic API key
+  - ElevenLabs API key
+  - Deepgram API key
+  - Hume AI API key
+  - Optional labels for identification
+- **Account Tab**:
+  - User profile information
+  - Usage statistics
+  - Account settings
 
 ### 🎨 Modern UI/UX
-- **Glassmorphism Design**: Beautiful frosted glass effects
-- **Dark Theme**: Eye-friendly dark mode interface
-- **Responsive Layout**: Mobile-first design that works on all devices
-- **Smooth Animations**: Polished transitions and micro-interactions
-- **Typing Indicators**: Visual feedback during AI processing
-- **Message Bubbles**: Clean, chat-like interface
+- **Glassmorphism Design** with dark gradient background
+- **Mobile-Responsive Layout** with collapsible sidebar
+- **Keyboard Shortcuts**:
+  - `Ctrl+Enter` / `Cmd+Enter` - Send message
+  - `Enter` - Send message (when not multiline)
+- **Real-time Message Streaming** with markdown rendering
+- **Token Usage Display** per message
+- **Loading States & Skeletons** for smooth UX
+- **Typing Indicators** during AI processing
+- **Error Handling** with retry mechanisms
+- **Smooth Animations** and transitions
+- **Message Bubbles** with user/assistant distinction
 
-### ⚙️ User Settings
-- **Voice Recognition Settings**:
-  - Adjustable silence threshold (500-3000ms)
-  - VAD sensitivity control (0-100%)
-- **Text-to-Speech Settings**:
-  - Speaking speed control (50-200%)
-  - Auto-play toggle
-- **Account Management**: View profile and usage statistics
-
-## Technology Stack
-
-### Frontend
-- **React 19**: Modern React with hooks and concurrent features
-- **TypeScript**: Type-safe development
-- **Tailwind CSS 4**: Utility-first styling with custom design system
-- **tRPC**: End-to-end typesafe APIs
-- **Wouter**: Lightweight routing
-- **Shadcn/ui**: High-quality UI components
-- **Streamdown**: Markdown rendering for AI responses
-
-### Backend
-- **Node.js + Express**: Fast, scalable server
-- **tRPC**: Type-safe API layer
-- **Drizzle ORM**: Type-safe database queries
-- **MySQL/TiDB**: Relational database
-- **S3 Storage**: File storage for audio recordings
-
-### AI Services
-- **OpenAI GPT-4**: Text generation and chat
-- **OpenAI Whisper**: Speech-to-text transcription
-- **Manus Built-in Services**: Integrated AI infrastructure
-
-## Database Schema
-
-### Tables
-- **users**: User accounts and authentication
-- **conversations**: Chat threads and metadata
-- **messages**: Individual messages with role and content
-- **userSettings**: User preferences and configuration
-- **providerConfigs**: API keys and provider settings
-- **voiceProfiles**: Custom TTS voice configurations
-- **usageStats**: Usage tracking and analytics
-
-## API Endpoints (tRPC)
-
-### Authentication
-- `auth.me`: Get current user
-- `auth.logout`: Logout user
-
-### Conversations
-- `conversations.list`: List all user conversations
-- `conversations.create`: Create new conversation
-- `conversations.get`: Get conversation by ID
-- `conversations.update`: Update conversation title
-- `conversations.delete`: Archive conversation
-
-### Messages
-- `messages.list`: Get messages for conversation
-- `messages.create`: Create new message
-- `messages.delete`: Delete message
-
-### Chat
-- `chat.send`: Send message and get AI response
-
-### Voice
-- `voice.transcribe`: Transcribe audio to text
-- `voice.uploadAudio`: Upload audio file to storage
-
-### Settings
-- `settings.get`: Get user settings
-- `settings.update`: Update user settings
-
-### Providers
-- `providers.list`: List configured providers
-- `providers.create`: Add new provider
-- `providers.update`: Update provider config
-- `providers.delete`: Remove provider
-
-### Voice Profiles
-- `voiceProfiles.list`: List voice profiles
-- `voiceProfiles.create`: Create voice profile
-- `voiceProfiles.delete`: Delete voice profile
-
-### Usage
-- `usage.stats`: Get usage statistics
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 22+
+- Node.js 22.x
 - pnpm package manager
-- MySQL/TiDB database
+- MySQL/TiDB database (provided by platform)
 
 ### Installation
 
@@ -135,7 +96,12 @@ A sophisticated, production-ready web application that serves as a universal AI 
    pnpm install
    ```
 
-3. Set up environment variables (automatically configured in Manus platform)
+3. Configure environment variables (automatically injected by platform):
+   - `DATABASE_URL` - Database connection string
+   - `JWT_SECRET` - Session signing secret
+   - `VITE_APP_ID` - OAuth application ID
+   - `BUILT_IN_FORGE_API_KEY` - API key for built-in services
+   - `BUILT_IN_FORGE_API_URL` - Built-in services URL
 
 4. Push database schema:
    ```bash
@@ -147,113 +113,187 @@ A sophisticated, production-ready web application that serves as a universal AI 
    pnpm dev
    ```
 
-### Environment Variables
-
-The following environment variables are automatically configured:
-- `DATABASE_URL`: Database connection string
-- `JWT_SECRET`: Session signing secret
-- `VITE_APP_ID`: OAuth application ID
-- `OAUTH_SERVER_URL`: OAuth server URL
-- `BUILT_IN_FORGE_API_KEY`: Manus AI services API key
-- `BUILT_IN_FORGE_API_URL`: Manus AI services URL
-
-## Usage
+## 📖 Usage Guide
 
 ### Creating a Conversation
-1. Click "New Conversation" in the sidebar
-2. Enter a conversation title
-3. Start chatting!
 
-### Voice Input
-1. Click the microphone button
-2. Speak your message
-3. The system will automatically detect when you stop speaking
-4. Your speech will be transcribed and sent to the AI
+**Option 1: From Templates (Recommended)**
+1. Click "Templates" button in sidebar
+2. Choose a template that matches your use case
+3. Start chatting immediately with optimized settings
 
-### Text Input
-1. Type your message in the input field
-2. Press Enter or click the Send button
-3. The AI will respond in real-time
+**Option 2: Manual Creation**
+1. Click "New Conversation" button in sidebar
+2. Enter a title for your conversation
+3. Configure AI settings via the settings menu in chat header
 
-### Adjusting Settings
-1. Click the Settings icon in the sidebar
-2. Navigate to the Voice Settings tab
-3. Adjust silence threshold and VAD sensitivity
-4. Configure TTS preferences
-5. Click "Save Voice Settings"
+### Using Voice Features
 
-## Features in Development
+**Voice Recording:**
+1. Click the microphone button in the chat input
+2. Speak your message clearly
+3. Recording stops automatically after silence is detected
+4. Transcription appears in the input field
+5. Review and edit if needed, then send
 
-- Multi-provider AI support (Anthropic, Google, etc.)
-- Custom voice cloning with ElevenLabs
-- File upload and multimodal analysis
-- Voice playback controls
-- Interrupt handling for AI responses
-- Advanced conversation branching
-- Usage analytics dashboard
+**Voice Call Mode:**
+1. Open a conversation
+2. Click "Voice Call" button in chat header
+3. Start speaking naturally when ready
+4. AI listens and responds automatically with voice
+5. Turn detection handles conversation flow
+6. Mute/unmute with microphone button
+7. Click red phone icon to end call
 
-## Architecture
+**TTS Playback:**
+1. Click the speaker icon next to any AI message
+2. Audio plays automatically after generation
+3. Click again to pause/resume
+4. Configure voice provider and speed in Settings
 
-### Frontend Architecture
-- Component-based React architecture
-- Custom hooks for state management
-- tRPC hooks for API calls
-- Optimistic updates for instant feedback
-- Error boundaries for graceful error handling
+### Configuring AI Providers
 
-### Backend Architecture
-- tRPC routers for type-safe APIs
-- Drizzle ORM for database queries
-- Middleware for authentication
-- File upload handling with S3
-- Error handling and validation
+**Adding API Keys:**
+1. Go to Settings (gear icon in sidebar)
+2. Navigate to "API Keys" tab
+3. Select provider from dropdown
+4. Enter your API key
+5. Optional: Add a label for identification
+6. Click "Add API Key"
 
-### Voice Processing Pipeline
-1. Audio capture via MediaRecorder API
-2. Real-time audio analysis with Web Audio API
-3. Voice activity detection
-4. Silence detection and auto-stop
-5. Upload to S3 storage
-6. Transcription via Whisper API
-7. Display transcribed text
+**Supported Providers:**
+- **OpenRouter** - Access 200+ models from various providers
+- **Mistral AI** - Mistral models including fine-tuned versions
+- **Anthropic** - Claude 3.5 Sonnet, Opus, Haiku
+- **ElevenLabs** - High-quality TTS with multiple voices
+- **Deepgram** - Advanced STT with custom models
+- **Hume AI** - Emotion-aware AI and TTS
 
-### AI Response Pipeline
-1. User message saved to database
-2. Conversation history retrieved
-3. Context built with system prompt
-4. AI API call with streaming
-5. Response saved to database
-6. Real-time display with markdown rendering
+**Per-Conversation Settings:**
+1. Open a conversation
+2. Click the settings icon (⚙️) in chat header
+3. Choose AI provider and model
+4. Adjust temperature (0 = deterministic, 2 = creative)
+5. Add custom system prompt (optional)
+6. Click "Save Settings"
 
-## Performance Optimizations
+### Exporting Conversations
 
-- Lazy loading of components
-- Optimistic UI updates
-- Efficient re-rendering with React hooks
-- Database query optimization
-- Audio processing in Web Workers (future)
-- Response caching (future)
+1. Open the conversation you want to export
+2. Click the download icon (⬇️) in chat header
+3. Choose format:
+   - **JSON** - Full data including metadata, timestamps, token counts
+   - **Markdown** - Formatted for documentation with headers
+   - **Text** - Simple plain text transcript
 
-## Security
+### Keyboard Shortcuts
 
-- JWT-based authentication
-- Secure session management
-- API key encryption (in progress)
-- Input validation and sanitization
-- CORS protection
-- Rate limiting (future)
+- `Ctrl+Enter` or `Cmd+Enter` - Send message
+- `Enter` - Send message (in single-line mode)
+- `Esc` - Close dialogs and modals
 
-## Browser Support
+## 🛠️ Technology Stack
+
+**Frontend:**
+- React 19 with TypeScript
+- Tailwind CSS 4 with custom design system
+- shadcn/ui components
+- tRPC for type-safe API calls
+- Wouter for routing
+- Streamdown for markdown rendering
+- Web Audio API for voice processing
+
+**Backend:**
+- Express 4
+- tRPC 11
+- Drizzle ORM
+- MySQL/TiDB database
+- OpenAI API (GPT-4, Whisper)
+- Multi-provider LLM integration
+
+**Voice Processing:**
+- MediaRecorder API for audio capture
+- Web Audio API for analysis
+- Voice Activity Detection (VAD)
+- Silence detection algorithms
+- Real-time audio streaming
+
+## 📊 Database Schema
+
+- **users** - User accounts and authentication
+  - id, openId, name, email, role, timestamps
+- **conversations** - Chat sessions with AI settings
+  - id, userId, title, llmProvider, llmModel, temperature, systemPrompt, timestamps
+- **messages** - Individual messages with metadata
+  - id, conversationId, role, content, audioUrl, provider, model, tokenCount, timestamps
+- **userSettings** - User preferences and defaults
+  - userId, silenceThreshold, vadSensitivity, ttsSpeed, autoPlayTts, defaultLlmProvider, defaultLlmModel, defaultSttProvider, defaultTtsProvider
+- **providerConfigs** - API keys and provider settings
+  - id, userId, provider, apiKey, label, isActive, timestamps
+- **voiceProfiles** - Voice customization settings
+  - id, userId, name, provider, voiceId, settings, timestamps
+- **usageTracking** - Token and audio usage statistics
+  - id, userId, conversationId, provider, model, tokensUsed, audioMinutes, cost, timestamps
+
+## 🎨 Design Philosophy
+
+The application features a modern glassmorphism design with:
+- **Dark gradient background** (purple to blue)
+- **Translucent panels** with backdrop blur
+- **Smooth animations** and micro-interactions
+- **Accessible color contrast** for readability
+- **Mobile-first responsive layout**
+- **Consistent spacing** and typography
+- **Visual hierarchy** with shadows and borders
+
+## 🔒 Security & Privacy
+
+- **Encrypted API Keys** - All provider credentials encrypted at rest
+- **Session-based Authentication** with JWT
+- **No Data Sharing** - Your data stays private
+- **User Data Isolation** - Each user's data is separate
+- **HTTPS Enforced** - All connections encrypted
+- **Input Validation** - Protection against injection attacks
+- **Rate Limiting** - Protection against abuse (future)
+
+## 🚀 Performance Optimizations
+
+- **Lazy Loading** - Components loaded on demand
+- **Optimistic UI Updates** - Instant feedback
+- **Efficient Re-rendering** - React hooks optimization
+- **Database Query Optimization** - Indexed queries
+- **Response Streaming** - Real-time AI responses
+- **Audio Processing** - Efficient VAD algorithms
+- **Caching Strategy** - Reduced API calls (future)
+
+## 📱 Browser Support
 
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
 - Mobile browsers with WebRTC support
 
-## License
+## 🤝 Contributing
+
+This is a private project. For issues or feature requests, please contact the project owner.
+
+## 📝 License
 
 Proprietary - All rights reserved
 
-## Support
+## 🙏 Acknowledgments
 
-For issues, questions, or feature requests, please contact the development team.
+- **OpenAI** - GPT models and Whisper API
+- **Anthropic** - Claude models
+- **Mistral AI** - Mistral models
+- **ElevenLabs** - Voice synthesis
+- **Deepgram** - Speech recognition
+- **Hume AI** - Emotion-aware AI
+- **Manus Platform** - Infrastructure and deployment
+- **shadcn/ui** - UI component library
+
+---
+
+**Version:** 2.0.0  
+**Last Updated:** November 2025  
+**Built with ❤️ using Manus AI**

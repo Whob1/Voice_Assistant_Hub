@@ -64,3 +64,21 @@
 - [x] Create advanced settings for each provider
 - [x] Test all provider integrations
 - [x] Create final checkpoint with all enhancements
+
+
+## Final Enhancement Phase: Advanced Features & Optimizations
+- [x] Add conversation settings dropdown menu in chat header
+- [x] Implement per-conversation provider/model/temperature controls
+- [x] Add system prompt editor in conversation settings
+- [x] Add TTS playback button next to AI messages
+- [x] Implement audio player with pause/resume controls
+- [x] Create voice call mode with continuous conversation
+- [x] Add turn detection for voice calls (VAD + silence)
+- [x] Implement conversation templates/presets system
+- [x] Add export conversation feature (JSON, Markdown, Text)
+- [x] Implement keyboard shortcuts (Ctrl+Enter to send)
+- [x] Add token usage display per message
+- [x] Optimize message rendering performance
+- [x] Add loading skeletons for better UX
+- [x] Implement error retry mechanism
+- [x] Create final comprehensive checkpoint

@@ -56,13 +56,18 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
         title: z.string().min(1).max(255).optional(),
+        llmProvider: z.string().optional(),
+        llmModel: z.string().optional(),
+        temperature: z.number().min(0).max(200).optional(),
+        systemPrompt: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const conversation = await db.getConversationById(input.id);
         if (!conversation || conversation.userId !== ctx.user.id) {
           throw new TRPCError({ code: "NOT_FOUND" });
         }
-        await db.updateConversation(input.id, { title: input.title });
+        const { id, ...updateData } = input;
+        await db.updateConversation(input.id, updateData);
         return { success: true };
       }),
 
