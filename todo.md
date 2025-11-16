@@ -82,3 +82,13 @@
 - [x] Add loading skeletons for better UX
 - [x] Implement error retry mechanism
 - [x] Create final comprehensive checkpoint
+
+
+## Bug Fixes & Custom Model Support
+- [x] Fix ConversationSettings component error (string pattern mismatch)
+- [x] Add custom model input field for fine-tuned models
+- [x] Add custom model input for OpenRouter unlisted models
+- [x] Add custom model input for Mistral fine-tuned models
+- [x] Add model validation and error handling
+- [x] Test custom model functionality
+- [x] Create checkpoint with fixes

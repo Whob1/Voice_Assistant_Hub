@@ -37,17 +37,33 @@ export function ConversationSettings({ conversationId }: ConversationSettingsPro
 
   const [provider, setProvider] = useState("openai");
   const [model, setModel] = useState("gpt-4");
+  const [customModel, setCustomModel] = useState("");
+  const [useCustomModel, setUseCustomModel] = useState(false);
   const [temperature, setTemperature] = useState(70);
   const [systemPrompt, setSystemPrompt] = useState("");
 
   useEffect(() => {
     if (conversation) {
       setProvider(conversation.llmProvider || "openai");
-      setModel(conversation.llmModel || "gpt-4");
+      const currentModel = conversation.llmModel || "gpt-4";
+      setModel(currentModel);
+      
+      // Check if current model is in the available models list
+      const providerData = llmProviders.find((p) => p.id === (conversation.llmProvider || "openai"));
+      const isCustom = providerData && !providerData.models.includes(currentModel);
+      
+      if (isCustom) {
+        setUseCustomModel(true);
+        setCustomModel(currentModel);
+      } else {
+        setUseCustomModel(false);
+        setCustomModel("");
+      }
+      
       setTemperature(conversation.temperature || 70);
       setSystemPrompt(conversation.systemPrompt || "");
     }
-  }, [conversation]);
+  }, [conversation, llmProviders]);
 
   const updateConversationMutation = trpc.conversations.update.useMutation({
     onSuccess: () => {
@@ -61,10 +77,17 @@ export function ConversationSettings({ conversationId }: ConversationSettingsPro
   });
 
   const handleSave = () => {
+    const finalModel = useCustomModel ? customModel.trim() : model;
+    
+    if (!finalModel) {
+      toast.error("Please select or enter a model");
+      return;
+    }
+    
     updateConversationMutation.mutate({
       id: conversationId,
       llmProvider: provider,
-      llmModel: model,
+      llmModel: finalModel,
       temperature,
       systemPrompt: systemPrompt || undefined,
     });
@@ -124,22 +147,56 @@ export function ConversationSettings({ conversationId }: ConversationSettingsPro
 
             {/* Model Selection */}
             <div className="space-y-2">
-              <Label htmlFor="model">Model</Label>
-              <Select value={model} onValueChange={setModel}>
-                <SelectTrigger id="model">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableModels.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {provider !== "openai" && "Requires API key configuration in Settings"}
-              </p>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="model">Model</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUseCustomModel(!useCustomModel)}
+                  className="h-7 text-xs"
+                >
+                  {useCustomModel ? "Use Preset" : "Custom Model"}
+                </Button>
+              </div>
+              
+              {useCustomModel ? (
+                <div className="space-y-2">
+                  <Input
+                    id="custom-model"
+                    value={customModel}
+                    onChange={(e) => setCustomModel(e.target.value)}
+                    placeholder="e.g., mistral-small-ft-abc123 or openrouter/model-name"
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter your fine-tuned model ID or any custom model identifier
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <Select value={model} onValueChange={setModel}>
+                    <SelectTrigger id="model">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.length > 0 ? (
+                        availableModels.map((m) => (
+                          <SelectItem key={m} value={m}>
+                            {m}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>
+                          No models available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {provider !== "openai" && "Requires API key configuration in Settings"}
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Temperature */}
