@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
@@ -12,6 +12,7 @@ export default function Home() {
   const { user, loading } = useAuth();
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const hasCreatedInitialConversation = useRef(false);
   const utils = trpc.useUtils();
 
   const { data: conversations = [] } = trpc.conversations.list.useQuery(undefined, {
@@ -31,12 +32,13 @@ export default function Home() {
 
     if (conversations.length > 0 && !selectedConversationId) {
       setSelectedConversationId(conversations[0].id);
-    } else if (conversations.length === 0 && !createConversationMutation.isPending) {
+    } else if (conversations.length === 0 && !hasCreatedInitialConversation.current && !createConversationMutation.isPending) {
+      hasCreatedInitialConversation.current = true;
       createConversationMutation.mutate({
         title: "New Conversation",
       });
     }
-  }, [user, loading, conversations, selectedConversationId]);
+  }, [user, loading, conversations, selectedConversationId, createConversationMutation]);
 
   if (loading) {
     return (
